@@ -5,14 +5,22 @@ require('dotenv').config();
 const MONGO_URI = process.env.MONGO_URI
 var app = express();
 const path = require("path");
-const allowedOrigins = ["task-manager-murex-six.vercel.app"];
-// Enable CORS for all origins
-// Enable CORS
+const allowedOrigins = ["https://task-manager-murex-six.vercel.app"];
+
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-})); // Allow all origins
-app.options("*", cors()); // Handle preflight requests globally
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., mobile apps or Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // Allow cookies and other credentials
+}));
+
+// Handle preflight requests globally
+app.options("*", cors());
 
 // Parse incoming requests with JSON payloads
 app.use(express.json());
